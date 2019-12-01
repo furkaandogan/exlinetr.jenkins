@@ -1,23 +1,33 @@
 version: '3.3'
 
 services:
-  jenkins:
-    image: jenkins/jenkins:alpine
+  ui:
+    image: jenkins/jenkins:lts
+    user: root
     ports:
       - 5050:8080
       - 50000:50000
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     networks:
       - jenkins-net
-      - registry-ui-net
+    volumes:
+      - /mnt/storage/jenkins:/var/jenkins_home
+
+  agent_docker:
+    image: registery.exlinetr.com/jenkins-agent-docker:1.0.0
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - jenkins-net
     volumes:
       - /mnt/storage/jenkins:/var/jenkins_home
 
 networks:
-  registry-ui-net:
   jenkins-net:
 
 volumes:
