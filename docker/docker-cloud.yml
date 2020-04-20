@@ -1,34 +1,47 @@
-version: '3.3'
-
+version: '3.7'
 services:
   ui:
     image: jenkins/jenkins:lts
     user: root
-    ports:
-      - 5050:8080
-      - 50000:50000
     deploy:
       replicas: 1
+      # placement:
+      #   constraints:
+      #     - node.role == manager
       restart_policy:
         condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik_network"
+        - "traefik.http.routers.jenkins.service=jenkins"
+        - "traefik.http.routers.jenkins.rule=Host(`jenkins.exlinetr.com`)"
+        - "traefik.http.routers.jenkins.entrypoints=web"
+        - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+        - "traefik.http.services.jenkins.loadbalancer.server.scheme=http"
     networks:
-      - jenkins-net
+      - jenkins_network
+      - traefik_network
     volumes:
       - /mnt/storage/jenkins:/var/jenkins_home
 
-  agent_docker:
-    image: registery.exlinetr.com/jenkins-agent-docker:1.0.0
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    networks:
-      - jenkins-net
-    volumes:
-      - /mnt/storage/jenkins:/var/jenkins_home
+  # agent_docker:
+  #   image: registery.exlinetr.com/jenkins-agent-docker:1.0.1
+  #   # entrypoint: "java -jar /usr/share/jenkins/agent.jar"
+  #   deploy:
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.role == manager
+  #     restart_policy:
+  #       condition: on-failure
+  #   networks:
+  #     - jenkins_network
 
 networks:
-  jenkins-net:
+  traefik_network:
+    external: true
+  jenkins_network:
+    name: jenkins_network
 
 volumes:
-  jenkinsdata:
+  jenkins_data:
