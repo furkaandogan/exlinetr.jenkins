@@ -24,19 +24,6 @@ services:
     volumes:
       - /mnt/storage/jenkins:/var/jenkins_home
 
-  # agent_docker:
-  #   image: registery.exlinetr.com/jenkins-agent-docker:1.0.1
-  #   # entrypoint: "java -jar /usr/share/jenkins/agent.jar"
-  #   deploy:
-  #     replicas: 1
-  #     placement:
-  #       constraints:
-  #         - node.role == manager
-  #     restart_policy:
-  #       condition: on-failure
-  #   networks:
-  #     - jenkins_network
-
 networks:
   traefik_network:
     external: true
